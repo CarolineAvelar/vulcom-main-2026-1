@@ -206,7 +206,7 @@ controller.login = async function(req, res) {
       // Formamos o cookie para enviar ao front-end
       res.cookie(process.env.AUTH_COOKIE_NAME, token, {
         httpOnly: true, // O cookie ficará inacessível para o JS no front-end
-        secure: true,   // O cookie será criptografado em conexões https
+        secure: false,   // O cookie será criptografado em conexões https
         sameSite: 'None',
         path: '/',
         maxAge: 24 * 60 * 60 * 100  // 24h
@@ -225,10 +225,17 @@ controller.login = async function(req, res) {
   }
 }
 
-controller.me = function(req, res) {
-  // Retorna as informações do usuário autenticado
-  // HTTP 200: OK (implícito)
-  res.send({user})
+controller.me = async function(req, res) {
+  try {
+    if (!req.authUser) {
+      return res.status(401).end()
+  }
+      res.send(req.authUser)
+  }
+  catch(error) {
+    console.error(error)
+    res.status(500).end()
+  }
 }
 
 controller.logout = function(req, res) {
